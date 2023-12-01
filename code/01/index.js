@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var fs = require("fs");
 var debugMode = false;
 function debugLog(msg) {
     if (debugMode) {
@@ -41,14 +44,11 @@ function handleTwo(line) {
     return parseInt(firstNum.concat(lastNum));
 }
 function parse(filename, handler, check) {
-    import * as fs from "fs";
     var result = 0;
     var data = fs.readFileSync(filename, 'utf8');
     data.split("\n").forEach(function (line) {
         if (line != "") {
-            if (debugMode) {
-                console.log("handle()::" + line + "::");
-            }
+            debugLog("handle()::" + line + "::");
             result += handler(line);
         }
     });

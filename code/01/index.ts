@@ -2,6 +2,10 @@ import * as fs from "fs";
 
 let debugMode = false;
 
+interface StringArray {
+    [index: string]: string;
+}
+
 function debugLog(msg: string) {
     if(debugMode) {
         console.log(msg);
@@ -15,10 +19,6 @@ function handleOne(line: string) {
     debugLog("Parsed: " + result);
 
     return result;
-}
-
-interface StringArray {
-    [index: string]: string;
 }
 
 function handleTwo(line: string) {
@@ -67,9 +67,7 @@ function parse(filename: string, handler: HandleFunction, check?: Object) {
     let data = fs.readFileSync(filename, 'utf8')
     data.split("\n").forEach((line) => { 
         if(line != "") {
-            if(debugMode) {
-                console.log("handle()::" + line + "::");
-            }
+            debugLog("handle()::" + line + "::");
 
             result += handler(line); 
         }
