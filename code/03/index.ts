@@ -103,4 +103,10 @@ handleOne('sample-1.txt', 4361);
 handleOne('data-1.txt', 520135);
 
 handleTwo('sample-2.txt', 467835);
-handleTwo('data-2.txt');
+handleTwo('data-2.txt', 72514855);
+
+handleOne('sample-3.txt', 413);
+handleTwo('sample-3.txt', 6756);
+
+handleOne('sample-4.txt', 925);
+handleTwo('sample-4.txt', 6756);
