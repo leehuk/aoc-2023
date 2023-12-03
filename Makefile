@@ -6,7 +6,7 @@ build:
 ifeq "" "${DAY}"
 	$(error DAY must be provided via env)
 endif
-	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:2023 bash -c 'cd code/${DAY} && node_modules/typescript/bin/tsc index.ts'
+	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:2023 bash -c 'cd code/${DAY} && node_modules/typescript/bin/tsc'
 
 docker:
 	docker build -t aoc.leeh:2023 
