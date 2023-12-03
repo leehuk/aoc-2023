@@ -8,33 +8,24 @@ function debugLog(msg: string) {
     }
 }
 
-function handleOne(line: string) {
+function lines(filename: string): string[] {
+   return fs.readFileSync(filename, 'utf8').replace(/[\r\n]+$/, '').split(/\n/);
 }
 
-function handleTwo(line: string) {
-}
-
-type HandleFunction = {
-    (line: string): void;
-};
-
-function parse(filename: string, handler: HandleFunction, check?: Object) {
-    let result = 0;
-
-    let data = fs.readFileSync(filename, 'utf8')
-    data.split("\n").forEach((line) => { 
-        if(line != "") {
-            debugLog("handle()::" + line + "::");
-
-            result += handler(line); 
-        }
-    });
+function handleOne(filename: string, check?: Object): void {
+    let result = 0
 
     console.log("Final results for " + filename + ": " + result + (check ? (result === check ? " (ok)" : " (***FAIL***)") : ""));
 }
 
-parse('sample-1.txt', handleOne);
-parse('data-1.txt', handleOne);
+function handleTwo(filename: string, check?: Object): void {
+    let result = 0;
 
-parse('sample-2.txt', handleTwo);
-parse('data-2.txt', handleTwo);
+    console.log("Final results for " + filename + ": " + result + (check ? (result === check ? " (ok)" : " (***FAIL***)") : ""));
+}
+
+//handleOne('sample-1.txt', 4361);
+//handleOne('data-1.txt', 520135);
+
+//handleTwo('sample-2.txt', 467835);
+//handleTwo('data-2.txt', 72514855);
