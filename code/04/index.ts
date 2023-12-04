@@ -55,13 +55,12 @@ function handleTwo(filename: string, check?: Object): void {
     let data = parse(filename);
 
     for(var [idx,card] of data.entries()) {
-        for(let i = 0; i < card.copies; i++) {
-            if(card.result == 0)
-                continue;
+        if(card.result == 0) {
+            continue;
+        }
 
-            for(let j = 1; j <= card.result; j++) {
-                data[idx+j].copies++;
-            }
+        for(let i = 1; i <= card.result; i++) {
+            data[idx+i].copies += card.copies;
         }
     }
     result = data.map(card => card.copies).reduce((acc, val) => acc + val, 0);
