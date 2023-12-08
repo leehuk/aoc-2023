@@ -8,7 +8,7 @@ function debugLog(msg: string) {
     }
 }
 
-interface NumArray extends Object {
+interface NumArray {
     [index: number]: number;
 };
 

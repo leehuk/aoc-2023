@@ -12,9 +12,8 @@
     "@types/node": "^20.10.1"
   },
   "dependencies": {
-    "@tsconfig/node20": "^20.1.2",
-    "@types/compute-gcd": "^1.2.3",
     "compute-gcd": "^1.2.1",
+    "tsconfig": "^7.0.0",
     "typescript": "^5.3.2"
   }
 }
