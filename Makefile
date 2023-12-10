@@ -18,7 +18,7 @@ endif
 	cp -r code/template code/${DAY}
 
 run: build
-	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:2023 bash -c 'cd code/${DAY} && node index.js'
+	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:2023 bash -c 'cd code/${DAY} && node --stack-size=4096 index.js'
 
 shell:
 	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:2023
