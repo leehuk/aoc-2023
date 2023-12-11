@@ -1,1 +1,1 @@
-data-1.txt
+../../data/06/data-2.txt
