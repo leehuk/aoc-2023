@@ -21,13 +21,11 @@ function fdiv(buf: string[][], fuzzy: boolean = false): number {
         let diff = buf[y].reduce((acc,val,idx) => { return (buf[y][idx] == buf[y+1][idx] ? acc : acc+1); }, 0);
 
         if(diff == 0 || (fuzzy && diff == 1)) {
-            let ldiff = 0;
-
             for(let yl = y-1, yr=y+2; yl >= 0 && yr < buf.length; yl--, yr++) {
-                ldiff += buf[yl].reduce((acc,val,idx) => { return (buf[yl][idx] == buf[yr][idx] ? acc : acc+1); }, 0);
+                diff += buf[yl].reduce((acc,val,idx) => { return (buf[yl][idx] == buf[yr][idx] ? acc : acc+1); }, 0);
             }
 
-            if((!fuzzy && diff == 0 && ldiff == 0) || (fuzzy && ((diff == 1 && ldiff == 0) || (diff == 0 && ldiff == 1)))) {
+            if((!fuzzy && diff == 0) || (fuzzy && diff == 1)) {
                 result = y+1;
                 break OUTER;
             }
