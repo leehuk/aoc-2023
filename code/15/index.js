@@ -49,7 +49,7 @@ function handleOne(filename, check) {
 }
 function handleTwo(filename, check) {
     let result = 0;
-    let boxes = [...Array(256)].fill(undefined).map(x => []);
+    let boxes = [...Array(256)].fill(undefined).map(x => new Map());
     lines(filename)[0].split(",").forEach(op => {
         let match = op.match(/^([A-Za-z]+)(-|=[0-9]+)$/);
         if (match) {
@@ -57,34 +57,16 @@ function handleTwo(filename, check) {
             let box = ahash(match[1]);
             let action = match[2];
             if (action == "-") {
-                for (let i = 0; i < boxes[box].length; i++) {
-                    let lens = boxes[box][i];
-                    if (lens['label'] == label) {
-                        boxes[box].splice(i, 1);
-                        break;
-                    }
-                }
+                boxes[box].delete(label);
             }
             else {
-                let found = false;
-                for (let i = 0; i < boxes[box].length; i++) {
-                    let lens = boxes[box][i];
-                    if (lens['label'] == label) {
-                        lens['power'] = parseInt(action.slice(1));
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    boxes[box].push({ label: label, power: parseInt(action.slice(1)) });
-                }
+                boxes[box].set(label, parseInt(action.slice(1)));
             }
         }
     });
     for (let i = 0; i < boxes.length; i++) {
-        for (let j = 0; j < boxes[i].length; j++) {
-            result += (i + 1) * (j + 1) * boxes[i][j].power;
-        }
+        let j = 0;
+        boxes[i].forEach((power) => { result += (i + 1) * (j + 1) * power; j++; });
     }
     console.log("Final results for " + filename + ": " + result + (check ? (result === check ? " (ok)" : " (***FAIL***)") : ""));
 }
