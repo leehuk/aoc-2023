@@ -15,6 +15,7 @@
     "@tsconfig/node20": "^20.1.2",
     "@types/compute-gcd": "^1.2.3",
     "compute-gcd": "^1.2.1",
+    "leeh-aoc-lib": "file:../../../lib",
     "typescript": "^5.3.2"
   }
 }
