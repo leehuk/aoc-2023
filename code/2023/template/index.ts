@@ -1,31 +1,21 @@
-import * as fs from "fs";
-
-let debugMode = false;
-
-function debugLog(msg: string) {
-    if(debugMode) {
-        console.log(msg);
-    }
-}
-
-function lines(filename: string): string[] {
-   return fs.readFileSync(filename, 'utf8').replace(/[\r\n]+$/, '').split(/\n/);
-}
+import * as al from 'leeh-aoc-lib';
 
 function handleOne(filename: string, check?: Object): void {
-    let result = 0
+    let result = 0;
+    let data = al.lines(filename).map(x => x.split(""));
 
-    console.log("Final results for " + filename + ": " + result + (check ? (result === check ? " (ok)" : " (***FAIL***)") : ""));
+    al.finish(filename, result, check);
 }
 
 function handleTwo(filename: string, check?: Object): void {
     let result = 0;
+    let data = al.lines(filename).map(x => x.split(""));
 
-    console.log("Final results for " + filename + ": " + result + (check ? (result === check ? " (ok)" : " (***FAIL***)") : ""));
+    al.finish(filename, result, check);
 }
 
-//handleOne('sample-1.txt', 4361);
-//handleOne('data-1.txt', 520135);
+handleOne('sample-1.txt', 0);
+//handleOne('data-1.txt', 0);
 
-//handleTwo('sample-2.txt', 467835);
-//handleTwo('data-2.txt', 72514855);
+//handleTwo('sample-2.txt', 0);
+//handleTwo('data-2.txt', 0);
