@@ -14,7 +14,9 @@
   "dependencies": {
     "@tsconfig/node20": "^20.1.2",
     "@types/compute-gcd": "^1.2.3",
+    "@types/heap": "^0.2.34",
     "compute-gcd": "^1.2.1",
+    "heap": "^0.2.7",
     "leeh-aoc-lib": "file:../../../lib",
     "typescript": "^5.3.2"
   }
