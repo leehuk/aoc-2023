@@ -60,69 +60,37 @@ function parse(data) {
     }
     return res;
 }
-function handleOne(filename, check) {
-    let result = 0;
-    let data = al.lines(filename);
-    let res = parse(data);
-    let accept = [];
-    let reject = [];
-    OUTER: for (let part of res.parts) {
-        let rname = "in";
-        let rules = res.rules[rname];
-        INNER: for (let i = 0; i < rules.length; i++) {
-            let rule = rules[i];
-            if (rule.comp === undefined || (rule.comp == "<" && part[rule.field] < rule.val) || (rule.comp == ">" && part[rule.field] > rule.val)) {
-                if (rule.action == "A") {
-                    accept.push(part);
-                    continue OUTER;
-                }
-                else if (rule.action == "R") {
-                    reject.push(part);
-                    continue OUTER;
-                }
-                else {
-                    rname = rule.action;
-                    rules = res.rules[rname];
-                    i = -1;
-                    continue INNER;
-                }
-            }
-        }
-    }
-    for (let part of accept) {
-        result += part.x + part.m + part.a + part.s;
-    }
-    al.finish(filename, result, check);
-}
-function rtparse(rules, rname, idx, parent) {
+function rtparse(rules, rname, idx, stack) {
     let rule = rules[rname][idx];
-    let rt = {
-        rule: rule
-    };
     if (rule.comp !== undefined) {
-        if (rule.action == "A" || rule.action == "R") {
-            rt.true = true;
+        if (rule.action == "A") {
+            rtaccept([...stack, rule]);
         }
-        else {
-            rt.true = rtparse(rules, rule.action, 0, rt);
+        else if (rule.action != "R") {
+            stack.push(rule);
+            rtparse(rules, rule.action, 0, stack);
+            stack.pop();
         }
-        rt.false = rtparse(rules, rname, idx + 1, rt);
+        let invrule = { ...rule };
+        invrule.comp = (rule.comp == "<" ? ">" : "<");
+        invrule.val = (rule.comp == "<" ? rule.val - 1 : rule.val + 1);
+        stack.push(invrule);
+        rtparse(rules, rname, idx + 1, stack);
+        stack.pop();
     }
     else {
-        if (rule.action == "A" || rule.action == "R") {
-            rt.true = true;
+        if (rule.action == "A") {
+            rtaccept([...stack, rule]);
         }
-        else {
-            rt.true = rtparse(rules, rule.action, 0, rt);
+        else if (rule.action != "R") {
+            rtparse(rules, rule.action, 0, stack);
         }
-        return rt;
     }
-    return rt;
 }
-function rtprint(rt, depth = 0) {
-    process.stdout.write(rt.rule.name.padEnd(10));
+function rtprint(rules, rname, idx, depth = 0) {
+    let rule = rules[rname][idx];
+    process.stdout.write(rule.name.padEnd(10));
     process.stdout.write("".padStart(depth * 5));
-    let rule = rt.rule;
     if (rule.comp !== undefined) {
         process.stdout.write("IF   " + rule.field + rule.comp + " " + rule.val?.toString().padStart(5) + " THEN ");
         if (rule.action == "A" || rule.action == "R") {
@@ -130,9 +98,9 @@ function rtprint(rt, depth = 0) {
         }
         else {
             process.stdout.write("...\n");
-            rtprint(rt.true, depth + 1);
+            rtprint(rules, rule.action, 0, depth + 1);
         }
-        rtprint(rt.false, depth + 1);
+        rtprint(rules, rname, idx + 1, depth);
     }
     else {
         process.stdout.write("OTHR ");
@@ -141,7 +109,7 @@ function rtprint(rt, depth = 0) {
         }
         else {
             process.stdout.write("CALL<" + rule.action + ">\n");
-            rtprint(rt.true, depth + 1);
+            rtprint(rules, rule.action, 0, depth + 1);
         }
     }
 }
@@ -169,49 +137,45 @@ function rtaccept(stack) {
     }
     total += math;
 }
-function rtcalc(rt, stack) {
-    let rule = rt.rule;
-    if (rule.comp !== undefined) {
-        if (rule.action == "R") {
-        }
-        else if (rule.action == "A") {
-            rtaccept([...stack, rule]);
-        }
-        else {
-            stack.push(rt.rule);
-            rtcalc(rt.true, stack);
-            stack.pop();
-        }
-        let invrule = {
-            name: rule.name,
-            field: rule.field,
-            comp: (rule.comp == "<" ? ">" : "<"),
-            val: (rule.comp == "<" ? rule.val - 1 : rule.val + 1),
-            action: rule.action,
-        };
-        stack.push(invrule);
-        rtcalc(rt.false, stack);
-        stack.pop();
-    }
-    else {
-        if (rule.action == "R") {
-        }
-        else if (rule.action == "A") {
-            rtaccept([...stack, rule]);
-        }
-        else {
-            rtcalc(rt.true, stack);
+function handleOne(filename, check) {
+    let result = 0;
+    let data = parse(al.lines(filename));
+    let accept = [];
+    let reject = [];
+    OUTER: for (let part of data.parts) {
+        let rname = "in";
+        let rules = data.rules[rname];
+        INNER: for (let i = 0; i < rules.length; i++) {
+            let rule = rules[i];
+            if (rule.comp === undefined || (rule.comp == "<" && part[rule.field] < rule.val) || (rule.comp == ">" && part[rule.field] > rule.val)) {
+                if (rule.action == "A") {
+                    accept.push(part);
+                    continue OUTER;
+                }
+                else if (rule.action == "R") {
+                    reject.push(part);
+                    continue OUTER;
+                }
+                else {
+                    rname = rule.action;
+                    rules = data.rules[rname];
+                    i = -1;
+                    continue INNER;
+                }
+            }
         }
     }
+    for (let part of accept) {
+        result += part.x + part.m + part.a + part.s;
+    }
+    al.finish(filename, result, check);
 }
 function handleTwo(filename, check) {
     let result = 0;
-    let data = al.lines(filename);
-    let res = parse(data);
-    let rt = rtparse(res.rules, 'in', 0);
-    //rtprint(rt as RuleTree, 0);
+    let data = parse(al.lines(filename));
     total = 0;
-    rtcalc(rt, []);
+    rtparse(data.rules, 'in', 0, []);
+    //rtprint(res.rules, 'in', 0);
     result = total;
     al.finish(filename, result, check);
 }

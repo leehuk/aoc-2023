@@ -59,69 +59,62 @@ function parse(data: string[]) {
     return res;
 }
 
-interface RuleTree {
-    rule: Rule,
-    true: RuleTree|boolean|undefined,
-    false: RuleTree|boolean|undefined
-}
-
-function rtparse(rules: Record<string,Rule[]>, rname: string, idx: number, parent?: RuleTree): RuleTree|undefined {
+function rtparse(rules: Record<string,Rule[]>, rname: string, idx: number, stack: Rule[]) {
     let rule = rules[rname][idx];
 
-    let rt = {
-        rule: rule
-    } as RuleTree;
-
     if(rule.comp !== undefined) {
-        if(rule.action == "A" || rule.action == "R") {
-            rt.true = true;
-        } else {
-            rt.true = rtparse(rules, rule.action, 0, rt);
+        if(rule.action == "A") {
+            rtaccept([...stack,rule]);
+        } else if(rule.action != "R") {
+            stack.push(rule);
+            rtparse(rules, rule.action, 0, stack);
+            stack.pop();
         }
 
-        rt.false = rtparse(rules, rname, idx+1, rt);
+        let invrule = { ...rule };
+        invrule.comp = (rule.comp == "<" ? ">" : "<");
+        invrule.val = (rule.comp == "<" ? rule.val!-1 : rule.val!+1);
+
+        stack.push(invrule);
+        rtparse(rules, rname, idx+1, stack);
+        stack.pop();
     } else {
-        if(rule.action == "A" || rule.action == "R") {
-            rt.true = true;
-        } else {
-            rt.true = rtparse(rules, rule.action, 0, rt);
+        if(rule.action == "A") {
+            rtaccept([...stack,rule]);
+        } else if(rule.action != "R") {
+            rtparse(rules, rule.action, 0, stack);
         }
-
-        return rt;
     }
-
-    return rt;
 }
 
-function rtprint(rt: RuleTree, depth: number = 0) {
-    process.stdout.write(rt.rule.name.padEnd(10))
+function rtprint(rules: Record<string,Rule[]>, rname: string, idx: number, depth: number = 0) {
+    let rule = rules[rname][idx];
+
+    process.stdout.write(rule.name.padEnd(10))
     process.stdout.write("".padStart(depth*5));
 
-    let rule = rt.rule;
     if(rule.comp !== undefined) {
         process.stdout.write("IF   " + rule.field + rule.comp + " " + rule.val?.toString().padStart(5) + " THEN ");
         if(rule.action == "A" || rule.action == "R") {
             process.stdout.write((rule.action == "A" ? "ACCEPT" : "REJECT") + "\n");
         } else {
             process.stdout.write("...\n");
-            rtprint(rt.true as RuleTree, depth+1);
+            rtprint(rules, rule.action, 0, depth+1);
         }
 
-        rtprint(rt.false as RuleTree, depth+1);
+        rtprint(rules, rname, idx+1, depth);
     } else {
         process.stdout.write("OTHR ");
         if(rule.action == "A" || rule.action == "R") {
             process.stdout.write((rule.action == "A" ? "ACCEPT" : "REJECT") + "\n");
         } else {
             process.stdout.write("CALL<" + rule.action + ">\n");
-            rtprint(rt.true as RuleTree, depth+1);
+            rtprint(rules, rule.action, 0, depth+1);
         }
     }
-
 }
 
 let total = 0;
-
 function rtaccept(stack: Rule[]) {
     let result: {[index: string]: boolean[]} = {
         x: Array(4001).fill(true),
@@ -150,53 +143,17 @@ function rtaccept(stack: Rule[]) {
     total += math;
 }
 
-function rtcalc(rt: RuleTree, stack: Rule[]) {
-    let rule = rt.rule;
-    if(rule.comp !== undefined) {
-        if(rule.action == "R") {
-
-        } else if(rule.action == "A") {
-            rtaccept([...stack,rule]);
-        } else {
-            stack.push(rt.rule);
-            rtcalc(rt.true as RuleTree, stack);
-            stack.pop();
-        }
-
-        let invrule = {
-            name: rule.name,
-            field: rule.field,
-            comp: (rule.comp == "<" ? ">" : "<"),
-            val: (rule.comp == "<" ? rule.val!-1 : rule.val!+1),
-            action: rule.action,
-        }
-        stack.push(invrule);
-        rtcalc(rt.false as RuleTree, stack);
-        stack.pop();
-    } else {
-        if(rule.action == "R") {
-
-        } else if(rule.action == "A") {
-            rtaccept([...stack,rule]);
-        } else {
-            rtcalc(rt.true as RuleTree, stack);
-        }
-    }
-
-}
-
 function handleOne(filename: string, check?: Object): void {
     let result = 0;
-    let data = al.lines(filename);
+    let data = parse(al.lines(filename));
 
-    let res = parse(data);
     let accept = [];
     let reject = [];
 
     OUTER:
-    for(let part of res.parts) {
+    for(let part of data.parts) {
         let rname = "in";
-        let rules = res.rules[rname];
+        let rules = data.rules[rname];
 
         INNER:
         for(let i = 0; i < rules.length; i++) {
@@ -210,7 +167,7 @@ function handleOne(filename: string, check?: Object): void {
                         continue OUTER;
                     } else {
                         rname = rule.action;
-                        rules = res.rules[rname];
+                        rules = data.rules[rname];
                         i = -1;
                         continue INNER;
                     }
@@ -227,15 +184,12 @@ function handleOne(filename: string, check?: Object): void {
 
 function handleTwo(filename: string, check?: Object): void {
     let result = 0;
-    let data = al.lines(filename);
-
-    let res = parse(data);
-    let rt = rtparse(res.rules, 'in', 0);
-
-    //rtprint(rt as RuleTree, 0);
+    let data = parse(al.lines(filename));
 
     total = 0;
-    rtcalc(rt as RuleTree, [])
+    rtparse(data.rules, 'in', 0, []);
+
+    //rtprint(res.rules, 'in', 0);
 
     result = total;
     al.finish(filename, result, check);

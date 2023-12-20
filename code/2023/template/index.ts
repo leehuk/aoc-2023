@@ -17,5 +17,5 @@ function handleTwo(filename: string, check?: Object): void {
 handleOne('sample-1.txt', 0);
 //handleOne('data-1.txt', 0);
 
-//handleTwo('sample-2.txt', 0);
-//handleTwo('data-2.txt', 0);
+//handleTwo('sample-1.txt', 0);
+//handleTwo('data-1.txt', 0);
