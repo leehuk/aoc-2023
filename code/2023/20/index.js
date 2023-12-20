@@ -47,9 +47,6 @@ function parse(data) {
         else if (rt.action == "&") {
             rt.cstate = {};
         }
-        if (rt.name == "rx") {
-            rt.success = true;
-        }
         match[3].replaceAll(" ", "").split(",").forEach((cname, idx) => {
             let crt = rtinit(engine, cname);
             engine[rt.name].children.push(crt);
@@ -72,8 +69,8 @@ function parse(data) {
     }
     return engine;
 }
-let stoptheworld = false;
-function pulse(engine) {
+let cyclengths = {};
+function pulse(engine, cycle = 0) {
     let stack = [{ from: engine['broadcaster'], to: engine['broadcaster'], low: true }];
     let countl = 0;
     let counth = 0;
@@ -81,11 +78,13 @@ function pulse(engine) {
         let pl = stack.shift();
         let rt = pl.to;
         //console.log(`pulse ${pl.from.name} -> ${rt.name} ${(pl.low ? "low" : "high")}`);
+        if (cycle > 0 && rt.name == "xm" && !pl.low) {
+            if (cyclengths[pl.from.name] === undefined) {
+                cyclengths[pl.from.name] = cycle;
+            }
+        }
         if (pl.low) {
             countl++;
-            if (rt.success === true) {
-                stoptheworld = true;
-            }
         }
         else {
             counth++;
@@ -137,19 +136,15 @@ function handleTwo(filename, check) {
     let result = 0;
     let data = parse(al.lines(filename));
     let i = 0;
-    while (true) {
-        console.log(`iteration ${i.toString().padStart(10)}: ` + asstr(data, 'jc'));
+    while (Object.values(cyclengths).length != 4) {
         i++;
-        pulse(data);
-        if (stoptheworld) {
-            result = i;
-            break;
-        }
+        pulse(data, i);
     }
+    result = Object.values(cyclengths).reduce((acc, val) => val * acc, 1);
     al.finish(filename, result, check);
 }
-//handleOne('sample-1.txt', 32000000);
-//handleOne('sample-2.txt', 11687500);
-//handleOne('data-1.txt', 0);
+handleOne('sample-1.txt', 32000000);
+handleOne('sample-2.txt', 11687500);
+handleOne('data-1.txt', 0);
 //handleTwo('sample-2.txt', 0);
-handleTwo('data-1-bv.txt', 0);
+handleTwo('data-1.txt', 224602011344203);

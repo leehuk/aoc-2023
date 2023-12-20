@@ -11,6 +11,8 @@ km -> jc
 km -> fc
 vr -> xq
 vr -> qq
+ft -> xm
+jz -> xm
 fj -> jz
 fj -> bj
 fj -> mr
@@ -34,6 +36,9 @@ tp -> bj
 tp -> fj
 mp -> vm
 mp -> nn
+broadcaster -> pt
+broadcaster -> tp
+broadcaster -> gv
 broadcaster -> bv
 qh -> fj
 qh -> nm
@@ -76,6 +81,7 @@ rr -> qq
 rr -> tr
 vv -> jc
 vv -> vn
+ng -> xm
 nn -> cv
 nn -> vm
 ch -> xt
