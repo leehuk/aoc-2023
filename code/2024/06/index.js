@@ -26,24 +26,42 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const al = __importStar(require("leeh-aoc-lib"));
 function handleOne(filename, check) {
     let result = 0;
-    let data = al.lines(filename).map(x => x.replace(/\s+/, " ")).map(x => x.split(" "));
-    let left = data.map(x => parseInt(x[0])).toSorted();
-    let right = data.map(x => parseInt(x[1])).toSorted();
-    for (const [i, _] of left.entries()) {
-        result += Math.abs(left[i] - right[i]);
+    let data = al.lines(filename).map(x => x.split(""));
+    let mark = al.fillarray(data.length, data[0].length);
+    let pos = al.veclocate(data, "^");
+    if (pos === false) {
+        console.log("uhoh");
+        return;
     }
+    data[pos['row']][pos['col']] = ".";
+    mark[pos['row']][pos['col']] = true;
+    let dir = { dir: "n" };
+    while (true) {
+        let peek = al.vecdataat(pos, data, dir.dir);
+        //console.log("at position: " + al.vecp(pos) + " facing " + dir.dir + " seeing " + peek);
+        if (peek === false) {
+            break;
+        }
+        else if (peek == ".") {
+            al.vecmove(pos, data, dir.dir);
+            mark[pos['row']][pos['col']] = true;
+        }
+        else if (peek == "#") {
+            al.degrotate(dir, 90);
+        }
+        else {
+            console.log("unexpected chr " + peek + " at " + al.vecp(pos));
+        }
+    }
+    result = mark.map(x => x.reduce((acc, val) => (val === true ? acc + 1 : acc), 0)).reduce((acc, val) => acc += val, 0);
     al.finish(filename, result, check);
 }
 function handleTwo(filename, check) {
     let result = 0;
-    let data = al.lines(filename).map(x => x.replace(/\s+/, " ")).map(x => x.split(" "));
-    let right = data.map(x => parseInt(x[1])).toSorted();
-    for (const [_, val] of data.map(x => parseInt(x[0])).entries()) {
-        result += (val * right.filter(x => x == val).length);
-    }
+    let data = al.lines(filename).map(x => x.split(""));
     al.finish(filename, result, check);
 }
-handleOne('sample-1.txt', 11);
-handleOne('data-1.txt', 2166959);
-handleTwo('sample-1.txt', 31);
-handleTwo('data-1.txt', 23741109);
+handleOne('sample-1.txt', 41);
+handleOne('data-1.txt', 0);
+//handleTwo('sample-1.txt', 0);
+//handleTwo('data-1.txt', 0);

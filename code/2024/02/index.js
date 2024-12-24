@@ -40,13 +40,6 @@ function handleOne(filename, check) {
     let result = 0;
     let data = al.lines(filename).map(x => x.split(" ").map(x => parseInt(x)));
     result = data.reduce((acc, val) => { return isValid(val) ? acc + 1 : acc; }, 0);
-    /*
-        outer: for(const [_, val] of data.entries()) {
-            if(isValid(val)) {
-                result++;
-            }
-        }
-    */
     al.finish(filename, result, check);
 }
 function handleTwo(filename, check) {
