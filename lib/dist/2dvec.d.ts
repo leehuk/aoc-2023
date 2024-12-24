@@ -16,6 +16,7 @@ export interface VecPos {
     col: number;
 }
 export declare function degrotate(dir: VecDir, rot: number): boolean;
+export declare function vecclone(vec: VecPos): VecPos;
 export declare function vecdata(vec: VecPos, data: any[][]): any;
 export declare function vecdataat(vec: VecPos, data: any[][], dir: keyof VecCardinal): any;
 export declare function vecdirs(): string[];

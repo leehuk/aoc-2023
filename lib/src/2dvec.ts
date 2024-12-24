@@ -57,6 +57,10 @@ export function degrotate(dir: VecDir, rot: number): boolean {
     return false;
 }
 
+export function vecclone(vec: VecPos): VecPos {
+    return { row: vec.row, col: vec.col } as VecPos;
+}
+
 export function vecdata(vec: VecPos, data: any[][]): any {
     return data[vec['row']][vec['col']];
 }

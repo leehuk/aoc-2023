@@ -59,9 +59,54 @@ function handleOne(filename, check) {
 function handleTwo(filename, check) {
     let result = 0;
     let data = al.lines(filename).map(x => x.split(""));
+    let startpos = al.veclocate(data, "^");
+    if (startpos === false) {
+        console.log("uhoh");
+        return;
+    }
+    data[startpos.row][startpos.col] = ".";
+    let blocks = al.fillarray(data.length, data[0].length);
+    for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[0].length; j++) {
+            let pos = al.vecclone(startpos);
+            let dir = { dir: "n" };
+            let mark = al.fillarrayarr(data.length, data[0].length);
+            mark[pos.row][pos.col].push(dir.dir);
+            if (i == startpos.row && j == startpos.col) {
+                continue;
+            }
+            if (data[i][j] == "#") {
+                continue;
+            }
+            data[i][j] = "#";
+            while (true) {
+                let dpeek = al.vecdataat(pos, data, dir.dir);
+                let mpeek = al.vecdataat(pos, mark, dir.dir);
+                if (dpeek === false) {
+                    break;
+                }
+                else if (mpeek.includes(dir.dir)) {
+                    blocks[i][j] = true;
+                    break;
+                }
+                else if (dpeek == ".") {
+                    al.vecmove(pos, data, dir.dir);
+                    mark[pos.row][pos.col].push(dir.dir);
+                }
+                else if (dpeek == "#") {
+                    al.degrotate(dir, 90);
+                }
+                else {
+                    console.log("unexpected chr " + dpeek + " at " + al.vecp(pos));
+                }
+            }
+            data[i][j] = ".";
+        }
+    }
+    result = blocks.map(x => x.reduce((acc, val) => (val === true ? acc + 1 : acc), 0)).reduce((acc, val) => acc += val, 0);
     al.finish(filename, result, check);
 }
 handleOne('sample-1.txt', 41);
-handleOne('data-1.txt', 0);
-//handleTwo('sample-1.txt', 0);
-//handleTwo('data-1.txt', 0);
+handleOne('data-1.txt', 5531);
+handleTwo('sample-1.txt', 6);
+handleTwo('data-1.txt', 0);
