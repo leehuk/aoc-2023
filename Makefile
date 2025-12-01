@@ -17,6 +17,7 @@ init:
 ifeq "" "${DAY}"
 	$(error DAY must be provided via env)
 endif
+	mkdir -p code/${YEAR}/
 	cp -r code/template code/${YEAR}/${DAY}
 	mkdir -p data/${YEAR}/${DAY}
 	touch data/${YEAR}/${DAY}/data-1.txt
