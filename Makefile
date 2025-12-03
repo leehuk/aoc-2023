@@ -24,10 +24,13 @@ endif
 	cd code/${YEAR}/${DAY} && ln -s ../../../data/${YEAR}/${DAY}/data-1.txt . && cd -
 
 lib:
-	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:dev bash -c 'cd lib && node_modules/typescript/bin/tsc'
+	docker run --rm -v ${ROOT_DIR}:/mnt aoc.leeh:dev bash -c 'cd lib && node_modules/typescript/bin/tsc'
 
 run: build
-	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:dev bash -c 'cd code/${YEAR}/${DAY} && node --stack-size=4096 index.js'
+	docker run --rm -v ${ROOT_DIR}:/mnt aoc.leeh:dev bash -c 'cd code/${YEAR}/${DAY} && node --stack-size=4096 index.js'
+
+runt: build
+	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:dev bash -c 'cd code/${YEAR}/${DAY} && time node --stack-size=4096 index.js'
 
 shell:
 	docker run -it --rm -v ${ROOT_DIR}:/mnt aoc.leeh:dev
