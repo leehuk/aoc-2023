@@ -52,21 +52,17 @@ export class Coord {
     }
 };
 
-interface CoordVec4 {
-    n: Coord;
-    e: Coord;
-    s: Coord;
-    w: Coord;
-}
+const coordVecN: Coord = new Coord(0, -1);
+const coordVecNE: Coord = new Coord(1, -1);
+const coordVecE: Coord = new Coord(1, 0);
+const coordVecSE: Coord = new Coord(1, 1);
+const coordVecS: Coord = new Coord(0, 1);
+const coordVecSW: Coord = new Coord(-1, 1);
+const coordVecW: Coord = new Coord(-1, 0);
+const coordVecNW: Coord = new Coord(-1, -1);
 
-const coordVec4: CoordVec4 = {
-    n: new Coord(0, -1),
-    e: new Coord(1, 0),
-    s: new Coord(0, 1),
-    w: new Coord(-1, 0),
-};
-
-const coordVec4Arr: Coord[] = [coordVec4.n, coordVec4.e, coordVec4.s, coordVec4.w];
+export const coordVec4Arr: Coord[] = [coordVecN, coordVecE, coordVecS, coordVecW];
+export const coordVec8Arr: Coord[] = [coordVecN, coordVecNE, coordVecE, coordVecSE, coordVecS, coordVecSW, coordVecW, coordVecNW];
 
 interface CoordStep {
     pos: Coord;
@@ -135,10 +131,10 @@ export class CoordGrid {
         return res;
     }
 
-    neighs(pos: Coord): Coord[] {
+    neighs(pos: Coord, vecarr: Coord[]): Coord[] {
         let neighs : Coord[] = [];
 
-        for(let vec of coordVec4Arr.values()) {
+        for(let vec of vecarr.values()) {
             let newpos = pos.addc(vec);
             if(!this.bounded(newpos)) {
                 continue;
@@ -150,12 +146,13 @@ export class CoordGrid {
         return neighs;
     }
 
+    // 2024-10
     walk(from: Coord, mode: "UNIQUE_TARGET"|"UNIQUE_PATH", cbcheck: (from: Coord, to: Coord, depth: number) => boolean, cbsuccess: (pos: Coord, depth: number) => boolean) : number {
         let step : CoordStep = {
             pos: from,
             from: from,
             depth: 0,
-            neighs: this.neighs(from),
+            neighs: this.neighs(from, coordVec4Arr),
         }
 
         let path = new CoordStepArray([step]);
@@ -186,7 +183,7 @@ export class CoordGrid {
                     pos: neigh,
                     from: step.pos,
                     depth: step.depth + 1,
-                    neighs: this.neighs(neigh),
+                    neighs: this.neighs(neigh, coordVec4Arr),
                 }
 
                 path.push(nstep);

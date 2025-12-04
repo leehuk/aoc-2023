@@ -12,6 +12,8 @@ export declare class Coord {
     distance(to: Coord): Coord;
     invert(): Coord;
 }
+export declare const coordVec4Arr: Coord[];
+export declare const coordVec8Arr: Coord[];
 export declare class CoordGrid {
     coords: Coord[][];
     xmax: number;
@@ -20,6 +22,6 @@ export declare class CoordGrid {
     at(pos: Coord): Coord;
     bounded(pos: Coord): boolean;
     findval(data: any): Coord[];
-    neighs(pos: Coord): Coord[];
+    neighs(pos: Coord, vecarr: Coord[]): Coord[];
     walk(from: Coord, mode: "UNIQUE_TARGET" | "UNIQUE_PATH", cbcheck: (from: Coord, to: Coord, depth: number) => boolean, cbsuccess: (pos: Coord, depth: number) => boolean): number;
 }
