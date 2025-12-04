@@ -52,6 +52,17 @@ export class Coord {
     }
 };
 
+interface CoordVec8 {
+    n: Coord|undefined,
+    ne: Coord|undefined,
+    e: Coord|undefined,
+    se: Coord|undefined,
+    s: Coord|undefined,
+    sw: Coord|undefined,
+    w: Coord|undefined,
+    nw: Coord|undefined,
+};
+
 const coordVecN: Coord = new Coord(0, -1);
 const coordVecNE: Coord = new Coord(1, -1);
 const coordVecE: Coord = new Coord(1, 0);
@@ -91,11 +102,13 @@ class CoordStepArray extends Array<CoordStep> {
 
 export class CoordGrid {
     coords: Coord[][];
+    edges: Map<Coord,Coord[]>;
     xmax: number;
     ymax: number;
 
     constructor(data: string[][]) {
         this.coords = new Array();
+        this.edges = new Map<Coord,Coord[]>();
 
         for(let [y, row] of data.entries()) {
             for(let [x, val] of row.entries()) {
@@ -112,6 +125,14 @@ export class CoordGrid {
 
     at(pos: Coord): Coord {
         return this.coords[pos.x][pos.y];
+    }
+
+    ats(pos: Coord): Coord|undefined {
+        if(this.bounded(pos)) {
+            return this.coords[pos.x][pos.y];
+        }
+
+        return undefined;
     }
 
     bounded(pos: Coord): boolean {
@@ -144,6 +165,57 @@ export class CoordGrid {
         }
 
         return neighs;
+    }
+
+    neighsWithEdge(pos: Coord, vecarr: Coord[]): Coord[] {
+        return this.neighs(pos, vecarr).filter(neigh => this.hasEdge(pos, neigh));
+    }
+
+    neighsVec8(pos: Coord): CoordVec8 {
+        return {
+            n: this.ats(pos.addc(coordVecN)),
+            ne: this.ats(pos.addc(coordVecNE)),
+            e: this.ats(pos.addc(coordVecE)),
+            se: this.ats(pos.addc(coordVecSE)),
+            s: this.ats(pos.addc(coordVecS)),
+            sw: this.ats(pos.addc(coordVecSW)),
+            w: this.ats(pos.addc(coordVecW)),
+            nw: this.ats(pos.addc(coordVecNW)),
+        } as CoordVec8;
+    }
+
+    addEdges(vecarr: Coord[], cbcheck: (from: Coord, to: Coord) => boolean): void {
+        this.coords.forEach(col => col.forEach(pos => {
+            let edges : Coord[] = [];
+
+            this.neighs(pos, vecarr).forEach(neigh => {
+                if(cbcheck(pos, neigh)) {
+                    edges.push(neigh);
+                }
+            });
+
+            if(edges.length > 0) {
+                this.edges.set(pos, edges);
+            }
+        }))
+    }
+
+    hasEdge(from: Coord, to: Coord|undefined): boolean {
+        return ((to === undefined) ? false : (this.edges.get(from)?.includes(to) === true) ? true : false);
+    }
+
+    // 2024-12
+    edgeFlood(pos: Coord, vecarr: Coord[]): Set<Coord> {
+        let res = new Set<Coord>();
+        let queue = new Set<Coord>();
+
+        queue.add(pos);
+        for(const wkpos of queue) {
+            res.add(wkpos);
+            this.neighsWithEdge(wkpos, vecarr).forEach(neigh => { queue.add(neigh); });
+        }
+
+        return res;
     }
 
     // 2024-10
