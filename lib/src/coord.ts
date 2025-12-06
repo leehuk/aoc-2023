@@ -106,21 +106,28 @@ export class CoordGrid {
     xmax: number;
     ymax: number;
 
-    constructor(data: string[][]) {
+    constructor(data: string[][], xmax: number = 0, ymax: number = 0) {
         this.coords = new Array();
         this.edges = new Map<Coord,Coord[]>();
 
-        for(let [y, row] of data.entries()) {
-            for(let [x, val] of row.entries()) {
-                if(this.coords[x] === undefined) {
-                    this.coords[x] = new Array();
+        if(data.length > 0) {
+            for(let [y, row] of data.entries()) {
+                for(let [x, val] of row.entries()) {
+                    if(this.coords[x] === undefined) {
+                        this.coords[x] = new Array();
+                    }
+                    this.coords[x][y] = new Coord(x, y, val);
                 }
-                this.coords[x][y] = new Coord(x, y, val);
             }
+
+            this.xmax = xmax ? xmax : this.coords.length - 1;
+            this.ymax = ymax ? ymax : this.coords[0].length - 1;
+        } else {
+            this.xmax = xmax!;
+            this.ymax = ymax!;
         }
 
-        this.xmax = this.coords.length - 1;
-        this.ymax = this.coords[0].length - 1;
+        return this;
     }
 
     at(pos: Coord): Coord {
@@ -139,6 +146,33 @@ export class CoordGrid {
         return pos.bounded(0, this.xmax, 0, this.ymax);
     }
 
+    draw(cbvalue: (pos?: Coord) => string): void {
+        for(let y = 0; y < this.ymax; y++) {
+            for(let x = 0; x < this.xmax; x++) {
+                // process.stdout.write(cbvalue((this.coords[x][y] !== undefined) ? this.coords[x][y] : undefined));
+                process.stdout.write(cbvalue(this.coords[x][y]));
+
+            }
+
+            process.stdout.write("\n");
+        }
+    }
+
+    drawclear(): void {
+        process.stdout.write("\x1b[2J\x1b[H");
+    }
+
+    fill(cbfill: () => any): CoordGrid {
+        for(let x = 0; x < this.xmax; x++) {
+            this.coords[x] = new Array();
+            for(let y = 0; y < this.ymax; y++) {
+                this.coords[x][y] = new Coord(x, y, cbfill());
+            }
+        }
+
+        return this;
+    }
+
     findval(data: any) {
         let res : Coord[] = [];
         for(let col of this.coords.values()) {
@@ -150,6 +184,16 @@ export class CoordGrid {
         }
 
         return res;
+    }
+
+    moveOverflow(pos: Coord, vec: Coord): Coord {
+        let x = (pos.x + vec.x) % this.xmax;
+        let y = (pos.y + vec.y) % this.ymax;
+
+        x += (x < 0) ? this.xmax : 0;
+        y += (y < 0) ? this.ymax : 0;
+
+        return this.coords[x][y];
     }
 
     neighs(pos: Coord, vecarr: Coord[]): Coord[] {

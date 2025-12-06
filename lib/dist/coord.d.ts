@@ -29,11 +29,15 @@ export declare class CoordGrid {
     edges: Map<Coord, Coord[]>;
     xmax: number;
     ymax: number;
-    constructor(data: string[][]);
+    constructor(data: string[][], xmax?: number, ymax?: number);
     at(pos: Coord): Coord;
     ats(pos: Coord): Coord | undefined;
     bounded(pos: Coord): boolean;
+    draw(cbvalue: (pos?: Coord) => string): void;
+    drawclear(): void;
+    fill(cbfill: () => any): CoordGrid;
     findval(data: any): Coord[];
+    moveOverflow(pos: Coord, vec: Coord): Coord;
     neighs(pos: Coord, vecarr: Coord[]): Coord[];
     neighsWithEdge(pos: Coord, vecarr: Coord[]): Coord[];
     neighsVec8(pos: Coord): CoordVec8;
